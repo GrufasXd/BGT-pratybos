@@ -9,16 +9,32 @@
 #include <chrono>
 using namespace std;
 
+bool fileExists(const string& filename) {
+    ifstream infile(filename);
+    return infile.good();
+}
+
+void clearfiles() {
+    ofstream ofs1("file3.txt", ios::trunc);
+    ofstream ofs2("file4.txt", ios::trunc);
+    ofstream ofs3("file5.txt", ios::trunc);
+    ofstream ofs4("file6.txt", ios::trunc);
+    ofs1.close();
+    ofs2.close();
+    ofs3.close();
+    ofs4.close();
+}
+
 char getRandomChar() {
     const string charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    return charset[rand() % charset.size()]; // Randomly select a character from the charset
+    return charset[rand() % charset.size()];
 }
 
 string randstring (int num)
 {   
     string rstring;
     for (int i = 0; i < num; i++) {
-        rstring += getRandomChar(); // Generate a random character and append it to the string
+        rstring += getRandomChar();
     }
     return rstring;
 }
@@ -82,17 +98,16 @@ unsigned int mix(unsigned int a, unsigned int b)
 
 string hashfunction(const string& input)
 {
-    const int rnum = 4; // Extra mixing rounds
+    const int rnum = 4;
     unsigned int seedas = 0xdeadbeef;
     unsigned int temp = 0;
 
     for(size_t i = 0; i < input.size(); i++)
     {
-        temp = input[i] * (i + 1); // Use the character value, scaled by its position
+        temp = input[i] * (i + 1);
         seedas = mix(seedas, temp);
     }
 
-    // Additional mixing rounds
     for(int i = 0; i < rnum; i++)
     {
         seedas = mix(seedas, temp);
@@ -123,14 +138,42 @@ void skaitytkitka(string filename, int numl)
     string hashas = hashfunction(kazkas);
     auto end = chrono::high_resolution_clock::now();
 
-    chrono::duration<double, milli> hasht = end - start;
+    chrono::duration<double, nano> hasht = end - start;
     cout << "Uzkoduota reiksme " << hashas << endl;
-    cout << "Uzhashint uztruko " << hasht.count() << " s" << endl;
+    cout << "Uzhashint uztruko " << hasht.count() << " ns" << endl;
+}
+
+void skaitytdaug(const string& filename, vector<string>& group10, vector<string>& group100, vector<string>& group500, vector<string>& group1000) {
+    ifstream infile(filename);
+    string line;
+    int count = 0;
+    while (getline(infile, line)) {
+        if (count < 25000) {
+            group10.push_back(line);
+        } else if (count < 50000) {
+            group100.push_back(line);
+        } else if (count < 75000) {
+            group500.push_back(line);
+        } else {
+            group1000.push_back(line);
+        }
+        count++;
+    }
+    infile.close();
+}
+
+void comparePairs(const vector<string>& hashes) {
+    for (size_t i = 0; i < hashes.size(); i += 2) {
+        if (hashes[i] == hashes[i + 1]) {
+            cout << "Eilute " << i << " ir " << i + 1 << " yra tokios pacios" << endl;
+        } 
+    }
 }
 
 int main(){
     string inputas;
     string outputas;
+    vector<string> group10, group100, group500, group1000;
     outputas.resize(64);
     //Generuojam failus
     string pirmasr = randstring(1001);
@@ -143,16 +186,29 @@ int main(){
     {
         treciasr = randstring(1001);
     } while (antrasr == treciasr);
-    
+    if(fileExists("file3.txt"))
+    cout << "Failas 3 jau egzistuoja" << endl;
+    else
     rasyti("file3.txt", pirmasr, 1);
+    if(fileExists("file4.txt"))
+    cout << "Failas 4 jau egzistuoja" << endl;
+    else
     rasyti("file4.txt", antrasr, 1);
+    if(fileExists("file5.txt"))
+    cout << "Failas 5 jau egzistuoja" << endl;
+    else
     rasyti("file5.txt", treciasr, 1);
+    if(fileExists("file6.txt"))
+    cout << "Failas 6 jau egzistuoja" << endl;
+    else
     rasyti("file6.txt", treciasr, 1);
     //Baigiam generuot
 
     //Kuriam daug.txt
-    ofstream ofs("daug.txt", ios::trunc);
-    ofs.close();
+    if(fileExists("daug.txt"))
+    cout << "Failas daug.txt jau egzistuoja" << endl;
+    else
+    {
     for(int i = 0; i< 25000; i++){
     string string10 = randstring(10);
     rasyti("daug.txt", string10, 25000);
@@ -172,7 +228,12 @@ int main(){
     string string1000 = randstring(1000);
     rasyti("daug.txt", string1000, 25000);
     }
-
+    skaitytdaug("daug.txt", group10, group100, group500, group1000);
+    comparePairs(group10);
+    comparePairs(group100);
+    comparePairs(group500);
+    comparePairs(group1000);
+    }
     //Baigiam kurt
     int a;
     cout << "Kaip rasyti inputa?" << endl;
