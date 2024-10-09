@@ -64,7 +64,11 @@ Tikriname atsparumą koalizijai:
 
 ![image](https://github.com/user-attachments/assets/c7d85ab8-9d7b-4c6b-98bf-1dbcfe7b981a)
 
-Jeigu iš nuskaitę failą būtume radę vienodas poras, programa būtų apie tai pranešus, bet kadangi nepranešė, vadinasi jų nėra.
+Jeigu iš nuskaityto failo būtume radę vienodas poras, programa būtų apie tai pranešus, bet kadangi nepranešė, vadinasi jų nėra.
+
+6 tyrimo rezultatai:
+
+![image](https://github.com/user-attachments/assets/49281050-fd74-4811-9674-5be6636ba867)
 
 
 
