@@ -7,6 +7,9 @@
 #include <cstdlib>
 #include <ctime>
 #include <chrono>
+#include <bitset>
+#include <climits>
+#include <algorithm>
 using namespace std;
 
 bool fileExists(const string& filename) {
@@ -170,7 +173,63 @@ void comparePairs(const vector<string>& hashes) {
     }
 }
 
+int hexDifference(const string& hash1, const string& hash2) {
+    int differences = 0;
+    for (size_t i = 0; i < hash1.size(); i++) {
+        if (hash1[i] != hash2[i]) {
+            differences++;
+        }
+    }
+    return differences;
+}
+
+int bitDifference(const string& hash1, const string& hash2) {
+    bitset<256> bits1, bits2;
+    for (size_t i = 0; i < hash1.size(); i++) {
+        bits1 |= bitset<256>(hash1[i]);
+        bits2 |= bitset<256>(hash2[i]);
+    }
+    return (bits1 ^ bits2).count();
+}
+
+void generateAndCompare(int numPairs, int stringLength) {
+    double totalHexDiffPercent = 0, totalBitDiffPercent = 0;
+    double minHexDiffPercent = 100.0, maxHexDiffPercent = 0.0;
+    double minBitDiffPercent = 100.0, maxBitDiffPercent = 0.0;
+
+    for (int i = 0; i < numPairs; i++) {
+        string str1 = randstring(stringLength);
+        string str2 = str1;
+        str2[rand() % stringLength] = getRandomChar(); // viena pakeiciam
+
+        string hash1 = hashfunction(str1);
+        string hash2 = hashfunction(str2);
+
+        int hexDiff = hexDifference(hash1, hash2);
+        int bitDiff = bitDifference(hash1, hash2);
+
+        double hexDiffPercent = (double(hexDiff) / 64) * 100;  // 64 hex 
+        double bitDiffPercent = (double(bitDiff) / 256) * 100; // 256 bitai
+
+        totalHexDiffPercent += hexDiffPercent;
+        totalBitDiffPercent += bitDiffPercent;
+
+        minHexDiffPercent = min(minHexDiffPercent, hexDiffPercent);
+        maxHexDiffPercent = max(maxHexDiffPercent, hexDiffPercent);
+        minBitDiffPercent = min(minBitDiffPercent, bitDiffPercent);
+        maxBitDiffPercent = max(maxBitDiffPercent, bitDiffPercent);
+    }
+
+    double avgHexDiffPercent = totalHexDiffPercent / numPairs;
+    double avgBitDiffPercent = totalBitDiffPercent / numPairs;
+
+    cout << "String ilgis: " << stringLength << endl;
+    cout << "Hex skirtumai -> Min: " << minHexDiffPercent << "%, Max: " << maxHexDiffPercent << "%, Avg: " << avgHexDiffPercent << "%" << endl;
+    cout << "Bit skirtumai -> Min: " << minBitDiffPercent << "%, Max: " << maxBitDiffPercent << "%, Avg: " << avgBitDiffPercent << "%" << endl;
+}
+
 int main(){
+    srand(time(0));
     string inputas;
     string outputas;
     vector<string> group10, group100, group500, group1000;
@@ -235,6 +294,16 @@ int main(){
     comparePairs(group1000);
     }
     //Baigiam kurt
+
+    //Pradedam kurt ir lygint bitu ir hexu lygmenyje
+
+    generateAndCompare(25000, 10);
+    generateAndCompare(25000, 100);
+    generateAndCompare(25000, 500);
+    generateAndCompare(25000, 1000);
+
+    //Baigiam lyginimus
+
     int a;
     cout << "Kaip rasyti inputa?" << endl;
     cout << "1 - ranka" << endl;
